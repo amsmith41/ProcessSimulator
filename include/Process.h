@@ -33,7 +33,7 @@ class Process
         ProcessState state; // Current state of the process
         int arrivalTime; // Time when the process arrived in the system
 
-        std::vector<BurstStep> burstTimes; // List of CPU burst times for the process
+        std::vector<BurstStep> burstTimes; // Sequence of CPU and I/O bursts for a process
         int currentBurstIndex; // Index of the current CPU burst being executed
         int remainingBurstTime; // Remaining time for the current CPU burst
 
@@ -47,7 +47,7 @@ class Process
         /*
             Construction of a process with a process ID, arrival time, and CPU burst times
         */
-        Process(int pid, int arrivalTime, const std::vector<int>& burstTimes);
+        Process(int pid, int arrivalTime, const std::vector<BurstStep>& burstTimes);
 
         int getPid() const; // Get the process ID
         int getArrivalTime() const; // Get the arrival time of the process
@@ -57,8 +57,8 @@ class Process
         int getCurrentBurstTime() const; // Get the current CPU burst time
         int getRemainingBurstTime() const; // Get the remaining time for the current CPU burst
         bool hasMoreBursts() const; // Check if the process has more CPU bursts to execute
-        bool isCurrentBurstCPU() const; // Check if the current burst is a CPU burst
-        bool isCurrentBurstIO() const; // Check if the current burst is an I/O burst
+        bool isCPU() const; // Check if the current burst is a CPU burst
+        bool isIO() const; // Check if the current burst is an I/O burst
 
         int getTotalRemainingCPUTime() const; // Get the total remaining CPU time for the process
         int getWaitingTime() const; // Get the total waiting time for the process
