@@ -15,3 +15,52 @@ Process::Process(int pid, int arrivalTime, const std::vector<BurstStep>& burstTi
        }
    }
 }
+
+int Process::getPid() const
+{
+    return pid;
+}
+
+int Process::getArrivalTime() const
+{
+    return arrivalTime;
+}
+
+ProcessState Process::getState() const
+{
+    return state;
+}
+
+void Process::setState(ProcessState newState)
+{
+    state = newState;
+}
+
+int Process::getRemainingBurstTime() const
+{
+    return remainingBurstTime;
+}
+
+bool Process::hasMoreBursts() const
+{
+    return currentBurstIndex < burstTimes.size() - 1; // Check if there are more bursts after the current one
+}
+
+bool Process::isCPU() const
+{
+    if (burstTimes.empty() || currentBurstIndex >= burstTimes.size()) {
+        return false; // No bursts or out of bounds, treat the burst as I/O instead of CPU
+    }
+    return burstTimes[currentBurstIndex].isCPU;
+}
+
+bool Process::isIO() const
+{
+    if (burstTimes.empty() || currentBurstIndex >= burstTimes.size()) {
+        return false; // No bursts or out of bounds, treat the burst as CPU instead of I/O
+    }
+    return !burstTimes[currentBurstIndex].isCPU;
+}
+
+
+
