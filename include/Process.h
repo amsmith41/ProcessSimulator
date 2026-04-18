@@ -65,4 +65,12 @@ class Process
         int getTurnaroundTime() const; // Get the total turnaround time for the process
         int getCompletionTime() const; // Get the completion time of the process
 
+        void decrementCurrentBurst(); // Decrement time of current CPU burst
+        bool advanceToNextBurst(); // Move to the next burst in the sequence, returns false if no more bursts are remaining
+        bool isCompleted() const; // Check if the process has completed all its bursts
+        bool incrementWaitingTime(); // Increment the waiting time for the process
+                                     // Returns true if the process is still waiting 
+                                     // False if it has completed
+        void setCompletionTime(int time); // Set the completion time for the process
+        void calculateTurnaroundTime(); // Calculate the turnaround time for the process based on arrival and completion times
 };
