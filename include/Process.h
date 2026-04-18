@@ -54,9 +54,8 @@ class Process
         ProcessState getState() const; // Get the current state of the process
         void setState(ProcessState newState); // Set the state of the process
 
-        int getCurrentBurstTime() const; // Get the current CPU burst time
         int getRemainingBurstTime() const; // Get the remaining time for the current CPU burst
-        bool hasMoreBursts() const; // Check if the process has more CPU bursts to execute
+        bool hasMoreBursts() const; // Check if the process has more bursts to execute
         bool isCPU() const; // Check if the current burst is a CPU burst
         bool isIO() const; // Check if the current burst is an I/O burst
 
@@ -68,9 +67,7 @@ class Process
         void decrementCurrentBurst(); // Decrement time of current CPU burst
         bool advanceToNextBurst(); // Move to the next burst in the sequence, returns false if no more bursts are remaining
         bool isCompleted() const; // Check if the process has completed all its bursts
-        bool incrementWaitingTime(); // Increment the waiting time for the process
-                                     // Returns true if the process is still waiting 
-                                     // False if it has completed
+        void incrementWaitingTime(); // Increment the waiting time for the process
         void setCompletionTime(int time); // Set the completion time for the process
         void calculateTurnaroundTime(); // Calculate the turnaround time for the process based on arrival and completion times
 };
