@@ -18,5 +18,5 @@ class IScheduler
         virtual void onProcessBlocked(Process* process) = 0; // Call when process becomes blocked and cannot run until it becomes unblocked
         virtual void onProcessUnblocked(Process* process) = 0; // Call when process becomes unblocked and ready to run
         virtual void onProcessTerminated(Process* process) = 0; // Call when process terminates
-        virtual bool hasReadyProcesses() const = 0; // Return true if < 1 processes are ready to run
+        virtual bool hasReadyProcesses() const = 0; // Return true if > 1 processes are ready to run
 };
