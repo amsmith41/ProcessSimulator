@@ -4,6 +4,7 @@
 
 /*
     Representation of the state of a process
+    New is a process that has just arrived
     Ready is process is ready to run
     Running is process is currently running
     Blocked is process is waiting for an event to finish or a resource to free up
@@ -11,6 +12,7 @@
 */
 enum class ProcessState
 {
+    New,
     Ready,
     Running,
     Blocked,
