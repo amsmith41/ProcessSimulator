@@ -23,6 +23,34 @@ void Simulation::run()
                 }
             }
 
+            // Update the state of blocked processes and check if they can become unblocked
+            for (Process* process : processes)
+            {
+                if (process->getState() == ProcessState::Blocked)
+                {
+                    process->decrementCurrentBurst(); // Simulate one tick of the I/O burst for the blocked process
+
+                    // Check if the blocked process can become unblocked
+                    if (process->getRemainingBurstTime() == 0)
+                    {
+                        if (process->hasMoreBursts())
+                        {
+                            process->advanceToNextBurst();
+                            process->setState(ProcessState::Ready);
+                            scheduler->onProcessUnblocked(process);
+                        }
+                        else
+                        {
+                            process->setState(ProcessState::Terminated);
+                            process->setCompletionTime(currentTime + 1);
+                            process->calculateTurnaroundTime();
+                            scheduler->onProcessTerminated(process);
+                        }
+                    }
+                }
+
+            }
+
             // When the runningProcess == nullptr, the CPU is idle 
             // So we need to get the next process to run from the scheduler
             if (runningProcess == nullptr && scheduler->hasReadyProcesses())
@@ -31,15 +59,6 @@ void Simulation::run()
                 if (runningProcess != nullptr) 
                 {
                     runningProcess->setState(ProcessState::Running);
-                }
-            }
-
-            // Increment waiting time for every ready process
-            for (Process* process : processes)
-            {
-                if (process->getState() == ProcessState::Ready)
-                {
-                    process->incrementWaitingTime();
                 }
             }
             
@@ -54,8 +73,17 @@ void Simulation::run()
                     if (runningProcess->hasMoreBursts())
                     {
                         runningProcess->advanceToNextBurst();
-                        runningProcess->setState(ProcessState::Ready);
-                        scheduler->addProcess(runningProcess);
+
+                        if (runningProcess->isIO())
+                        {
+                            runningProcess->setState(ProcessState::Blocked);
+                            scheduler->onProcessBlocked(runningProcess);
+                        }
+                        else // Is CPU burst, so we can add it back to the ready queue
+                        {
+                            runningProcess->setState(ProcessState::Ready);
+                            scheduler->addProcess(runningProcess);
+                        }
                     }
                     else
                     {
@@ -70,6 +98,15 @@ void Simulation::run()
             }
 
             scheduler->onTick(currentTime, runningProcess); // Update internal state of scheduler
+
+            // Increment waiting time for every ready process
+            for (Process* process : processes)
+            {
+                if (process->getState() == ProcessState::Ready)
+                {
+                    process->incrementWaitingTime();
+                }
+            }
 
             // Check if all processes have completed, if so we can end the simulation
             allProcessesCompleted = true; 
