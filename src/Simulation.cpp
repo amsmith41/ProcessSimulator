@@ -34,6 +34,14 @@ void Simulation::run()
                 }
             }
 
+            // Increment waiting time for every ready process
+            for (Process* process : processes)
+            {
+                if (process->getState() == ProcessState::Ready)
+                {
+                    process->incrementWaitingTime();
+                }
+            }
             
 
         
