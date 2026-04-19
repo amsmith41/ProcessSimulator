@@ -1,11 +1,21 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17
 
-SRC = src/main.cpp src/Process.cpp src/FCFSScheduler.cpp
-OUT = process_test
+SRC = src/Process.cpp src/Simulation.cpp src/FCFSScheduler.cpp
 
-all:
-	$(CXX) $(CXXFLAGS) $(SRC) -o $(OUT)
+MAIN = src/main.cpp
+TEST = src/tests/TestSimulation.cpp
+
+OUT_MAIN = main
+OUT_TEST = test_sim
+
+all: main
+
+main:
+	$(CXX) $(CXXFLAGS) $(SRC) $(MAIN) -o $(OUT_MAIN)
+
+test:
+	$(CXX) $(CXXFLAGS) $(SRC) $(TEST) -o $(OUT_TEST)
 
 clean:
-	rm -f $(OUT)
+	rm -f $(OUT_MAIN) $(OUT_TEST)
