@@ -2,17 +2,25 @@
 #include "../include/Process.h"
 #include "../include/Ischeduler.h"
 
-while(true)
+Simulation::Simulation(std::vector<Process*> processes, IScheduler* scheduler)
+    : processes(processes), scheduler(scheduler), runningProcess(nullptr), currentTime(0)
 {
-    // Get arrivals
-    // If no running process, get one from the scheduler
-    // Execute one tick of the running process, update scheduler with tick
-    // Handle completion of process
-    // Advance the time
-    ///////////////
-    // Later integration will involve
-    // Time slicing for RRobin
-    // Full i/o blocking and unblocking logic
-    // logging and output of results
-    break; // Placeholder
+}   
+
+
+void Simulation::run()
+{
+    bool allProcessesCompleted = false; 
+    while (!allProcessesCompleted) {
+        
+            // Get the newly arrived process and add it to the ready queue
+            for (Process* process : processes) {
+                if (process->getState() == ProcessState::New && process->getArrivalTime() <= currentTime)
+                {
+                    process->setState(ProcessState::Ready); // New -> Ready state
+                    scheduler->addProcess(process);
+                }
+            }
+        
+    }
 }
