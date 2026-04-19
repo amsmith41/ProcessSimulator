@@ -43,6 +43,34 @@ void Simulation::run()
                 }
             }
             
+            // Simulate one tick of the running process that is currently running
+            if (runningProcess != nullptr)
+            {
+                runningProcess->decrementCurrentBurst();
+
+                // If and when the process finishes bursting
+                if (runningProcess->getRemainingBurstTime() == 0)
+                {
+                    if (runningProcess->hasMoreBursts())
+                    {
+                        runningProcess->advanceToNextBurst();
+                        runningProcess->setState(ProcessState::Ready);
+                        scheduler->addProcess(runningProcess);
+                    }
+                    else
+                    {
+                        runningProcess->setState(ProcessState::Terminated);
+                        runningProcess->setCompletionTime(currentTime + 1);
+                        runningProcess->calculateTurnaroundTime();
+                        scheduler->onProcessTerminated(runningProcess);
+                    }
+
+                    runningProcess = nullptr; // CPU becomes idle after process finishes its burst
+                }
+            }
+
+            scheduler->onTick(currentTime, runningProcess); // Update internal state of scheduler
+
 
         
     }
