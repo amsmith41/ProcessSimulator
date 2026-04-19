@@ -71,7 +71,18 @@ void Simulation::run()
 
             scheduler->onTick(currentTime, runningProcess); // Update internal state of scheduler
 
+            // Check if all processes have completed, if so we can end the simulation
+            allProcessesCompleted = true; 
+            for (Process* process : processes)
+            {
+                if (process->getState() != ProcessState::Terminated)
+                {
+                    allProcessesCompleted = false;
+                    break;
+                }
+            }
 
-        
+            ++currentTime; // Increment the current time after each tick
+
     }
 }
