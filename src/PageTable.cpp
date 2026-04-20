@@ -27,6 +27,27 @@ void PageTable::unmapPage(int virtualPageNumber)
     }
 }
 
+// Check if a virtual page is mapped
+// Return false if unmapped
+bool PageTable::isMapped(int virtualPageNumber) const
+{
+    if (virtualPageNumber >= 0 && virtualPageNumber < entries.size())
+    {
+        return entries[virtualPageNumber].valid; // Return valid bit since to indicate mapping
+    }
+    return false; // Not mapped
+}
+
+// Get the physical frame number, return -1 if unmapped
+int PageTable::getPhysicalFrameNumber(int virtualPageNumber) const
+{
+    if (virtualPageNumber >= 0 && virtualPageNumber < entries.size() && entries[virtualPageNumber].valid)
+    {
+        return entries[virtualPageNumber].physicalFrameNumber; // Return physical frame number since it is mapped
+    }
+    return -1; // Not mapped
+}
+
 int PageTable::getNumPages() const
 {
     return entries.size();
