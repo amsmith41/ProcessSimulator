@@ -1,9 +1,12 @@
 #include "../include/Simulation.h"
 #include "../include/Process.h"
 #include "../include/Ischeduler.h"
+#include "../include/Logger.h"
+#include <unordered_set> // There is current need in tracking which processes have already been placed in the CPU,
+                         // This is a temporary stopgap to ensure that the logger is correctly logging the resume and start events
 
-Simulation::Simulation(std::vector<Process*> processes, IScheduler* scheduler)
-    : processes(processes), scheduler(scheduler), runningProcess(nullptr), currentTime(0)
+Simulation::Simulation(std::vector<Process*> processes, IScheduler* scheduler, Logger* logger)
+    : processes(processes), scheduler(scheduler), runningProcess(nullptr), logger(logger), currentTime(0)
 {
 }   
 
@@ -11,6 +14,8 @@ Simulation::Simulation(std::vector<Process*> processes, IScheduler* scheduler)
 void Simulation::run()
 {
     bool allProcessesCompleted = false; 
+    std::unordered_set<int> startedProcesses; // Set at the time a process starts running for the first time, used for logging
+
     while (!allProcessesCompleted) {
         
             // Get the newly arrived process and add it to the ready queue
