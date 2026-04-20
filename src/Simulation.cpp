@@ -82,6 +82,9 @@ void Simulation::run()
 
                     if (logger != nullptr)
                     {
+                        // Unordered set required at this point to determine if a process 
+                        // Is starting for the first time, or has already been started in the past and is now resuming
+                        // Resuming is helpful for future scheduling algorithms like RRobin
                         if (startedProcesses.find(runningProcess->getPid()) == startedProcesses.end())
                         {
                             logger->logEvent(currentTime, runningProcess->getPid(), EventType::Start);
