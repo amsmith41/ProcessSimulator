@@ -12,7 +12,8 @@ enum class EventType
     Resume, // Process resumes running on CPU after being unblocked
     Block, // Process is blocked for I/O
     Unblock, // Process finishes I/O and is unblocked
-    Terminate // Process finished all its bursts and terminates
+    Terminate, // Process finished all its bursts and terminates
+    ContextSwitch // Context switch occurs
 };
 
 struct LogEntry
@@ -20,6 +21,10 @@ struct LogEntry
     int time; // Simulation time when event occurs
     int processId; // ID of the process involved in the event
     EventType eventType; // Type of event that occurred
+    int fromProcessId; // For context switch events, the process that is being switched out, -1 if none
+    int toProcessId; // For context switch events, the process that is being switched in, -1 if none
+    std::string contextReason; // For context switch events, the reason for the context switch
+
 };
 
 class Logger
@@ -31,7 +36,7 @@ class Logger
     public:
         Logger(const std::string& filename); // Initialize logger and open file stream
         ~Logger(); // Close file stream if open
-        
+
         void logEvent(int time, int processId, EventType eventType); // Log an event with time, ProcessID, and the type of event
         const std::vector<LogEntry>& getLogEntries() const; // Get log entires
         void print() const; // Print log entries
