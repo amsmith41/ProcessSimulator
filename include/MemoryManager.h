@@ -10,3 +10,7 @@ struct AddressTranslation
     bool valid; // True if translation is valid and the virtual page is mapped to a physical frame, false otherwise
 };
 
+// need class mem manager
+// define number of frames and page size 
+// declare prototypes for accessors to the above, a memory manager constructor using the above, and a function
+// to perform address translation through a Process* process and the virtual addy
