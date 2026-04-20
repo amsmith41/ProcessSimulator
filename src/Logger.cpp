@@ -13,6 +13,7 @@ static std::string eventTypeToString(EventType eventType)
         case EventType::Block: return "Block";
         case EventType::Unblock: return "Unblock";
         case EventType::Terminate: return "Terminate";
+        default: return "Unknown Event";
     }
 }
 
@@ -43,7 +44,7 @@ void Logger::logEvent(int time, int processId, EventType eventType)
 
     if (outFile.is_open())
     {
-        outFile << "Time" << time << ", Process " << processId << ", Event: " << eventTypeToString(eventType)
+        outFile << "Time " << time << ", Process " << processId << ", Event: " << eventTypeToString(eventType)
                 << '\n';
     }
 }
