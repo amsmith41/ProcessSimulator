@@ -26,3 +26,8 @@ void PageTable::unmapPage(int virtualPageNumber)
         entries[virtualPageNumber].physicalFrameNumber = -1; // Frame reset to -1 to represent unmapped
     }
 }
+
+int PageTable::getNumPages() const
+{
+    return entries.size();
+}
