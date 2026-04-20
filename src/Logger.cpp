@@ -2,6 +2,20 @@
 #include <iostream>
 #include <string>
 
+// Helper function to convert enum EventType to string
+static std::string eventTypeToString(EventType eventType)
+{
+    switch (eventType)
+    {
+        case EventType::Arrival: return "Arrival";
+        case EventType::Start: return "Start";
+        case EventType::Resume: return "Resume";
+        case EventType::Block: return "Block";
+        case EventType::Unblock: return "Unblock";
+        case EventType::Terminate: return "Terminate";
+    }
+}
+
 Logger::Logger(const std::string& filename)
 {
     outFile.open(filename);
