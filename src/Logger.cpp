@@ -13,6 +13,7 @@ static std::string eventTypeToString(EventType eventType)
         case EventType::Block: return "Block";
         case EventType::Unblock: return "Unblock";
         case EventType::Terminate: return "Terminate";
+        case EventType::ContextSwitch: return "Context Switch";
         default: return "Unknown Event";
     }
 }
@@ -49,6 +50,19 @@ void Logger::logEvent(int time, int processId, EventType eventType)
     }
 }
 
+void Logger::logContextSwitch(int time, int fromProcessId, int toProcessId, const std::string& reason)
+{
+    LogEntry entry{time, -1, EventType::ContextSwitch, fromProcessId, toProcessId, reason};
+    logEntries.push_back(entry);
+
+    if (outFile.is_open())
+    {
+        outFile << "Time " << time << ", Context Switch: Process " << fromProcessId 
+                << " -> Process " << toProcessId << ", Reason: " << reason 
+                << '\n';
+    }
+}
+
 // Get log entries
 const std::vector<LogEntry>& Logger::getLogEntries() const
 {
@@ -60,7 +74,16 @@ void Logger::print() const
 {
     for (const auto& entry : logEntries)
     {
-        std::cout << "Time " << entry.time << ", Process " << entry.processId << ", Event: " << eventTypeToString(entry.eventType) 
-                  << '\n';
+        if (entry.eventType == EventType::ContextSwitch)
+        {
+            std::cout << "Time " << entry.time << ", Context Switch: Process " << entry.fromProcessId 
+                      << " -> Process " << entry.toProcessId << ", Reason: " << entry.contextReason 
+                      << '\n';
+        }
+        else
+        {
+            std::cout << "Time " << entry.time << ", Process " << entry.processId << ", Event: " << eventTypeToString(entry.eventType) 
+                      << '\n';
+        }
     }
 }

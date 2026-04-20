@@ -16,6 +16,9 @@ void Simulation::run()
     bool allProcessesCompleted = false; 
     std::unordered_set<int> startedProcesses; // Set at the time a process starts running for the first time, used for logging
 
+    int lastExitedProcessId = -1; // Log context switch events, tracks last process that exited the CPU
+    std::string contextSwitchReason; // Log context switch events, tracks the reason for the context switch
+
     while (!allProcessesCompleted) {
         
             // Get the newly arrived process and add it to the ready queue
@@ -76,8 +79,21 @@ void Simulation::run()
             if (runningProcess == nullptr && scheduler->hasReadyProcesses())
             {
                 runningProcess = scheduler->getNextProcess(currentTime);
-                if (runningProcess != nullptr) 
+
+                if (runningProcess != nullptr)
                 {
+                    if (logger != nullptr)
+                    {
+                        if (lastExitedProcessId != -1)
+                        {
+                            logger->logContextSwitch(currentTime, lastExitedProcessId, runningProcess->getPid(), contextSwitchReason);
+                        }
+                        else
+                        {
+                            logger->logContextSwitch(currentTime, -1, runningProcess->getPid(), "CPU Idle -> Start Process");
+                        }
+                    }
+
                     runningProcess->setState(ProcessState::Running);
 
                     if (logger != nullptr)
@@ -96,6 +112,10 @@ void Simulation::run()
                         }
                         
                     }
+
+                    // Reset context switch tracking variables
+                    lastExitedProcessId = -1;
+                    contextSwitchReason.clear();
                 }
             }
             
@@ -113,32 +133,42 @@ void Simulation::run()
 
                         if (runningProcess->isIO())
                         {
-                            runningProcess->setState(ProcessState::Blocked);
-                            scheduler->onProcessBlocked(runningProcess);
 
                             if (logger != nullptr)
                             {
                                 logger->logEvent(currentTime + 1, runningProcess->getPid(), EventType::Block);
                             }
+
+                            lastExitedProcessId = runningProcess->getPid();
+                            contextSwitchReason = "Process has been blocked";
+
+                            runningProcess->setState(ProcessState::Blocked);
+                            scheduler->onProcessBlocked(runningProcess);
+
                         }
                         else // Is CPU burst, so we can add it back to the ready queue
                         {
+                            lastExitedProcessId = runningProcess->getPid();
+                            contextSwitchReason = "CPU burst completed";
+
                             runningProcess->setState(ProcessState::Ready);
                             scheduler->addProcess(runningProcess);
                         }
                     }
                     else
                     {
-                        runningProcess->setState(ProcessState::Terminated);
-                        runningProcess->setCompletionTime(currentTime + 1);
-                        runningProcess->calculateTurnaroundTime();
-                        scheduler->onProcessTerminated(runningProcess);
-                        
                         if (logger != nullptr)
                         {
                             logger->logEvent(currentTime + 1, runningProcess->getPid(), EventType::Terminate);
                         }
 
+                        lastExitedProcessId = runningProcess->getPid();
+                        contextSwitchReason = "Process has terminated";
+
+                        runningProcess->setState(ProcessState::Terminated);
+                        runningProcess->setCompletionTime(currentTime + 1);
+                        runningProcess->calculateTurnaroundTime();
+                        scheduler->onProcessTerminated(runningProcess);
                     }
 
                     runningProcess = nullptr; // CPU becomes idle after process finishes its burst

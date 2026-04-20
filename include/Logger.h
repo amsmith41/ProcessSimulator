@@ -38,6 +38,7 @@ class Logger
         ~Logger(); // Close file stream if open
 
         void logEvent(int time, int processId, EventType eventType); // Log an event with time, ProcessID, and the type of event
+        void logContextSwitch(int time, int fromProcessId, int toProcessId, const std::string& reason); // Log a context switch event
         const std::vector<LogEntry>& getLogEntries() const; // Get log entires
         void print() const; // Print log entries
 };
