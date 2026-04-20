@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17
 
-SRC = src/Process.cpp src/Simulation.cpp src/FCFSScheduler.cpp
+SRC = src/Process.cpp src/Simulation.cpp src/FCFSScheduler.cpp src/Logger.cpp
 
 MAIN = src/main.cpp
 TEST = src/tests/TestSimulation.cpp

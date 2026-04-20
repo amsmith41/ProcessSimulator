@@ -3,8 +3,9 @@
 #include "../../include/Process.h"
 #include "../../include/FCFSScheduler.h"
 #include "../../include/Simulation.h"
+#include "../../include/Logger.h"
 
-void testIOBehavior()
+void testSimulationBehavior()
 {
     Process p1(1, 0, std::vector<BurstStep>
     {
@@ -26,8 +27,9 @@ void testIOBehavior()
     std::vector<Process*> processes = {&p1, &p2, &p3};
 
     FCFSScheduler scheduler;
-    Simulation simulation(processes, &scheduler);
-
+    Logger logger("simulation.txt");
+    
+    Simulation simulation(processes, &scheduler, &logger);
     simulation.run();
 
     std::cout << "Simulation complete\n\n";
@@ -61,6 +63,6 @@ void testIOBehavior()
 // There is need to test for CPU->CPU->CPU... I/O->I/O->I/O... and other burst patterns to ensure program robustness
 int main()
 {
-    testIOBehavior();
+    testSimulationBehavior();
     return 0;
 }
