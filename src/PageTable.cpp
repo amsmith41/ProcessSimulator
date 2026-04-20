@@ -15,3 +15,14 @@ void PageTable::mapPage(int virtualPageNumber, int physicalFrameNumber)
         entries[virtualPageNumber].physicalFrameNumber = physicalFrameNumber;
     }
 };
+
+// Unmap a virtual page (-1)
+// When valid bit is implemented, set to false
+void PageTable::unmapPage(int virtualPageNumber)
+{
+    if (virtualPageNumber >= 0 && virtualPageNumber < entries.size())
+    {
+        entries[virtualPageNumber].valid = false;
+        entries[virtualPageNumber].physicalFrameNumber = -1; // Frame reset to -1 to represent unmapped
+    }
+}
