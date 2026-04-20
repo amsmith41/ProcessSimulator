@@ -112,6 +112,11 @@ void Simulation::run()
                         {
                             runningProcess->setState(ProcessState::Blocked);
                             scheduler->onProcessBlocked(runningProcess);
+
+                            if (logger != nullptr)
+                            {
+                                logger->logEvent(currentTime + 1, runningProcess->getPid(), EventType::Block);
+                            }
                         }
                         else // Is CPU burst, so we can add it back to the ready queue
                         {
@@ -125,6 +130,12 @@ void Simulation::run()
                         runningProcess->setCompletionTime(currentTime + 1);
                         runningProcess->calculateTurnaroundTime();
                         scheduler->onProcessTerminated(runningProcess);
+                        
+                        if (logger != nullptr)
+                        {
+                            logger->logEvent(currentTime + 1, runningProcess->getPid(), EventType::Terminate);
+                        }
+
                     }
 
                     runningProcess = nullptr; // CPU becomes idle after process finishes its burst
