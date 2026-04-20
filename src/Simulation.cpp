@@ -48,6 +48,11 @@ void Simulation::run()
                             process->advanceToNextBurst();
                             process->setState(ProcessState::Ready);
                             scheduler->onProcessUnblocked(process);
+
+                            if (logger != nullptr)
+                            {
+                                logger->logEvent(currentTime + 1, process->getPid(), EventType::Unblock);
+                            }
                         }
                         else
                         {
@@ -55,6 +60,11 @@ void Simulation::run()
                             process->setCompletionTime(currentTime + 1);
                             process->calculateTurnaroundTime();
                             scheduler->onProcessTerminated(process);
+
+                            if (logger != nullptr)
+                            {
+                                logger->logEvent(currentTime + 1, process->getPid(), EventType::Terminate);
+                            }
                         }
                     }
                 }
