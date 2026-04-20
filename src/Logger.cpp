@@ -16,6 +16,7 @@ static std::string eventTypeToString(EventType eventType)
     }
 }
 
+// Constructor to initialize logger and open file stream
 Logger::Logger(const std::string& filename)
 {
     outFile.open(filename);
@@ -25,6 +26,7 @@ Logger::Logger(const std::string& filename)
     }
 }
 
+// Destructor to close file stream if open
 Logger::~Logger()
 {
     if (outFile.is_open())
@@ -33,6 +35,7 @@ Logger::~Logger()
     }
 }
 
+// Log an event with time, ProcessId, and the type of event
 void Logger::logEvent(int time, int processId, EventType eventType)
 {
     LogEntry entry{time, processId, eventType};
@@ -40,18 +43,23 @@ void Logger::logEvent(int time, int processId, EventType eventType)
 
     if (outFile.is_open())
     {
-        outFile << "Time" << time << ", Process " << processId << ", Event: "
+        outFile << "Time" << time << ", Process " << processId << ", Event: " << eventTypeToString(eventType)
                 << '\n';
-
     }
 }
 
+// Get log entries
 const std::vector<LogEntry>& Logger::getLogEntries() const
 {
     return logEntries;
 }
 
+// Print log entries
 void Logger::print() const
 {
-
+    for (const auto& entry : logEntries)
+    {
+        std::cout << "Time " << entry.time << ", Process " << entry.processId << ", Event: " << eventTypeToString(entry.eventType) 
+                  << '\n';
+    }
 }
