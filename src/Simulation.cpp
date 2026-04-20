@@ -79,6 +79,20 @@ void Simulation::run()
                 if (runningProcess != nullptr) 
                 {
                     runningProcess->setState(ProcessState::Running);
+
+                    if (logger != nullptr)
+                    {
+                        if (startedProcesses.find(runningProcess->getPid()) == startedProcesses.end())
+                        {
+                            logger->logEvent(currentTime, runningProcess->getPid(), EventType::Start);
+                            startedProcesses.insert(runningProcess->getPid());
+                        }
+                        else
+                        {
+                            logger->logEvent(currentTime, runningProcess->getPid(), EventType::Resume);
+                        }
+                        
+                    }
                 }
             }
             
