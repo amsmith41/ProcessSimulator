@@ -25,6 +25,11 @@ void Simulation::run()
                 {
                     process->setState(ProcessState::Ready); // New -> Ready state
                     scheduler->addProcess(process);
+
+                    if (logger != nullptr)
+                    {
+                        logger->logEvent(currentTime, process->getPid(), EventType::Arrival);
+                    }
                 }
             }
 
