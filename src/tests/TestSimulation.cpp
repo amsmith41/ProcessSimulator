@@ -7,22 +7,25 @@
 
 void testSimulationBehavior()
 {
+
+    const int numPages = 8;
+
     Process p1(1, 0, std::vector<BurstStep>
     {
         {true, 3},   // CPU
         {false, 2},  // I/O
         {true, 1}    // CPU
-    });
+    }, numPages);
 
     Process p2(2, 1, std::vector<BurstStep>
     {
         {true, 2}
-    });
+    }, numPages);
 
     Process p3(3, 2, std::vector<BurstStep>
     {
         {true, 1}
-    });
+    }, numPages);
 
     std::vector<Process*> processes = {&p1, &p2, &p3};
 

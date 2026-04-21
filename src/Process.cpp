@@ -1,8 +1,9 @@
 #include "../include/Process.h" 
 
-Process::Process(int pid, int arrivalTime, const std::vector<BurstStep>& burstTimes)
+Process::Process(int pid, int arrivalTime, const std::vector<BurstStep>& burstTimes, int numPages)
     : pid(pid), arrivalTime(arrivalTime), burstTimes(burstTimes), currentBurstIndex(0), remainingBurstTime(0),
-      totalRemainingCPUTime(0), waitingTime(0), turnaroundTime(0), completionTime(0), state(ProcessState::New)
+      totalRemainingCPUTime(0), waitingTime(0), turnaroundTime(0), completionTime(0), state(ProcessState::New),
+      pageTable(numPages)
 {
    // Calculate total remaining CPU time based on the burst times
    if (!this->burstTimes.empty()){
@@ -29,6 +30,16 @@ int Process::getArrivalTime() const
 ProcessState Process::getState() const
 {
     return state;
+}
+
+PageTable& Process::getPageTable()
+{
+    return pageTable;
+}
+
+const PageTable& Process::getPageTable() const
+{
+    return pageTable;
 }
 
 void Process::setState(ProcessState newState)

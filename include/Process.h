@@ -1,5 +1,5 @@
 #pragma once
-
+#include "PageTable.h"
 #include <vector>
 
 /*
@@ -45,11 +45,14 @@ class Process
         int turnaroundTime; // Total turnaround time for the process
         int completionTime; // Time when the process completed execution
 
+        PageTable pageTable; // Page table for the process to manage virtual memory
+
+
     public:
         /*
             Construction of a process with a process ID, arrival time, and CPU burst times
         */
-        Process(int pid, int arrivalTime, const std::vector<BurstStep>& burstTimes);
+        Process(int pid, int arrivalTime, const std::vector<BurstStep>& burstTimes, int numPages); // Constructor to initialize process with a page table of a fixed number of pages, default is 16
 
         int getPid() const; // Get the process ID
         int getArrivalTime() const; // Get the arrival time of the process
@@ -72,4 +75,7 @@ class Process
         void incrementWaitingTime(); // Increment the waiting time for the process
         void setCompletionTime(int time); // Set the completion time for the process
         void calculateTurnaroundTime(); // Calculate the turnaround time for the process based on arrival and completion times
-};
+    
+        PageTable& getPageTable(); // Get the page table for the process
+        const PageTable& getPageTable() const; // Get the page table for the process
+    };
