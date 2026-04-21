@@ -5,11 +5,29 @@ Create simulated processes with states (ready, running, blocked); multiple sched
 
 Themes:
   Process Control
+    - Process States (New,Ready,Running,Blocked,Unblocked,Terminated)
+    - In the Process class and manipulated by the Simulation
   Process Scheduling
+    - Multiple scheduling policies of FCFS, RRobin, Shortest Job Next, Shortest time to completion first
   Computer Memory Systems
+    - Page mapping
+    - Memory Translation
   Control Flow & Linking Concepts
+    - Control flow is expressed mostly in the Simulation engine of Simulation.cpp
+      - With each tick of the runtime system, arrivals are introduced, progression of I/O is simulated, scheduling decisions based off stateness, the transition of said states, and the logging of events occuring
+      - The state of a process determines what action to take
+
+      main ---> simulation -> Ischeduler
+                           -> Process
+                           -> Memory Manager -> Page Table
+
+      Abstraction with a scheduler interface
+      Makefile to link compilation of multiple files
+    
 
 Design Decisions & Trade-offs:
+
+Dependency direction when creating the foundation of the project...
 
 Challenges Encountered and Lessons Learned:
 
@@ -33,6 +51,6 @@ make test
   after finished, make clean
   and you can examine the results in the simulation.txt file
 
-  
+
 
 

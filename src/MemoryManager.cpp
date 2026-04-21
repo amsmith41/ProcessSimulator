@@ -29,4 +29,39 @@ AddressTranslation MemoryManager::translateAddress(Process* process, int virtual
     int virtualPageNumber = virtualAddress / pageSize; // Typically, this is calculated as bit shift,  performance should increase if this was a bit operation
     int offset = virtualAddress % pageSize;
 
+    const PageTable& pageTable = process->getPageTable();
+
+    translation.virtualPageNumber = virtualPageNumber;
+    translation.offset = offset;
+
+    if (!pageTable.isMapped(virtualPageNumber))
+    {
+        return translation; // Virtual page is not mapped, return invalid translation
+        // There may be redundancy in validity checks, but better safe than sorry
+    }
+
+    int frameNumber = pageTable.getPhysicalFrameNumber(virtualPageNumber);
+
+    if (frameNumber < 0 || frameNumber >= numFrames)
+    {
+        return translation; // Invalid frame number
+    }
+
+    int physicalAddress = frameNumber * pageSize + offset;
+
+    translation.valid = true;
+    translation.frameNumber = frameNumber;
+    translation.physicalAddress = physicalAddress;
+
+    return translation; // Return translation, it should be valid if the if checks passed
+}
+
+int MemoryManager::getPageSize() const
+{
+    return pageSize;
+}
+
+int MemoryManager::getNumFrames() const
+{
+    return numFrames;
 }
