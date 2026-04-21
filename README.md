@@ -1,17 +1,20 @@
 # 360CourseProject - Process Simulator
 
-Project Overview and Goals
-Create simulated processes with states (ready, running, blocked); multiple scheduling algorithms (FCFS, SJN, RR, STCF); virtual address translation simulation context-switch logging 
+# Project Overview and Goals
+Create a simulation of processes with states (new, ready, running, blocked, terminated); multiple scheduling algorithms (FCFS, SJN, RR, STCF); virtual address translation context-switch logging 
 
-Themes:
+# Themes:
   Process Control
     - Process States (New,Ready,Running,Blocked,Unblocked,Terminated)
-    - In the Process class and manipulated by the Simulation
+    - In the Process class and manipulated by the Simulation, determines which process runs at which time for efficient use of resources
+    
   Process Scheduling
     - Multiple scheduling policies of FCFS, RRobin, Shortest Job Next, Shortest time to completion first
+    
   Computer Memory Systems
     - Page mapping
     - Memory Translation
+    
   Control Flow & Linking Concepts
     - Control flow is expressed mostly in the Simulation engine of Simulation.cpp
       - With each tick of the runtime system, arrivals are introduced, progression of I/O is simulated, scheduling decisions based off stateness, the transition of said states, and the logging of events occuring
@@ -25,11 +28,15 @@ Themes:
       Makefile to link compilation of multiple files
     
 
-Design Decisions & Trade-offs:
+# Design Decisions & Trade-offs:
+  - C++ versus C, allows for more foreseeable scalability with potential tools/libraries. Additionally allows for an abstraction based approach with the multiple scheduling policies.
+  - Separation of duties, low coupling
+  - Specialization of roles
+  - Dependency direction when creating the blueprints and foundation of the project
 
-Dependency direction when creating the foundation of the project...
-
-Challenges Encountered and Lessons Learned:
+# Challenges Encountered and Lessons Learned:
+  - Refactoring and covering loose ends
+  - Systematically writing down what needs to be done in a checklist, then going through each individual item on that list (Would approach this differently with issues within issues on Github)
 
 
 Notes:
