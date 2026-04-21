@@ -1,5 +1,7 @@
 #pragma once
 
+class Process;
+
 struct AddressTranslation
 {
     int virtualAddress; // Virtual address to be translated
@@ -10,7 +12,16 @@ struct AddressTranslation
     bool valid; // True if translation is valid and the virtual page is mapped to a physical frame, false otherwise
 };
 
-// need class mem manager
-// define number of frames and page size 
-// declare prototypes for accessors to the above, a memory manager constructor using the above, and a function
-// to perform address translation through a Process* process and the virtual addy
+class MemoryManager
+{
+    private:
+        int pageSize;
+        int numFrames;
+
+    public:
+        MemoryManager(int pageSize, int numFrames); // Constructor to initialize page size and number of frames
+        AddressTranslation translateAddress(Process* process, int virtualAddress) const; // Translate virtual address to physical address using the page table
+
+        int getPageSize() const; // Get page size
+        int getNumFrames() const; // Get number of frames
+};
