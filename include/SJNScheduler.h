@@ -8,6 +8,7 @@
 class SJNScheduler : public IScheduler
 {
     private:
+    Process* currentProcess = nullptr; // only used to return the same process so other schedulers work
     struct CompareBurstTime{
         bool operator()(const Process* p1, const Process* p2) {
             return p1->getRemainingBurstTime() > p2->getRemainingBurstTime();

@@ -8,19 +8,24 @@ void STCFScheduler::addProcess(Process* process)
         return;
     }
     readyQueue.push(process);
-    if (currentProcess == nullptr){
-        return;
-    }
-    if(currentProcess->getRemainingBurstTime() > readyQueue.top()->getRemainingBurstTime())
+
+    if (currentProcess != nullptr && currentProcess->getRemainingBurstTime() > readyQueue.top()->getRemainingBurstTime())
     {
         readyQueue.push(currentProcess);
+        currentProcess = nullptr;
     }
 }
  
 Process* STCFScheduler::getNextProcess(int currentTime)
 {
-    if (readyQueue.empty()) {
+    if (readyQueue.empty() && currentProcess == nullptr) {
         return nullptr;
+    }
+    if (currentProcess != nullptr && (
+        readyQueue.empty() || currentProcess->getRemainingBurstTime() <= readyQueue.top()->getRemainingBurstTime()
+    ))
+    {
+        return currentProcess;
     }
     Process* nextProcess = readyQueue.top();
     readyQueue.pop();
@@ -30,7 +35,9 @@ Process* STCFScheduler::getNextProcess(int currentTime)
  
 void STCFScheduler::onTick(int currentTime, Process* runningProcess)
 {
-    currentProcess = runningProcess;
+    if (runningProcess == nullptr){
+        currentProcess = nullptr;
+    }
 }
  
 void STCFScheduler::onProcessBlocked(Process* process)
