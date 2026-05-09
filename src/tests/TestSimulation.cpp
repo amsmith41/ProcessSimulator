@@ -2,6 +2,7 @@
 #include <vector>
 #include "../../include/Process.h"
 #include "../../include/FCFSScheduler.h"
+#include "../../include/RRScheduler.h"
 #include "../../include/Simulation.h"
 #include "../../include/Logger.h"
 #include "../../include/MemoryManager.h"
@@ -30,10 +31,10 @@ void testSimulationBehavior()
 
     std::vector<Process*> processes = {&p1, &p2, &p3};
 
-    FCFSScheduler scheduler;
+    IScheduler* scheduler = new RRScheduler(2);
     Logger logger("simulation.txt");
     
-    Simulation simulation(processes, &scheduler, &logger);
+    Simulation simulation(processes, scheduler, &logger);
     simulation.run();
 
     std::cout << "Simulation complete\n\n";
