@@ -41,6 +41,7 @@ void Simulation::run()
                 case ProcessState::Blocked:  // Update the state of blocked processes and check if they can become unblocked
                     process->decrementCurrentBurst(); // Simulate one tick of the I/O burst for the blocked process
 
+
                     // Check if the blocked process can become unblocked
                     if (process->getRemainingBurstTime() == 0)
                     {
@@ -147,6 +148,7 @@ void Simulation::run()
                         contextSwitchReason = "CPU burst completed";
 
                         runningProcess->setState(ProcessState::Ready);
+                        // This line breaks Round Robin but also catches some edge cases in STCF, so we need to refactor RR
                         //scheduler->addProcess(runningProcess);
                     }
                 }

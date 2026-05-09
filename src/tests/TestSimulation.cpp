@@ -4,6 +4,7 @@
 #include "../../include/FCFSScheduler.h"
 #include "../../include/SJNScheduler.h"
 #include "../../include/RRScheduler.h"
+#include "../../include/STCFScheduler.h"
 #include "../../include/Simulation.h"
 #include "../../include/Logger.h"
 #include "../../include/MemoryManager.h"
@@ -66,6 +67,7 @@ void testSimulationBehavior()
 }
 
 void testSJNScheduler(){
+
     const int numPages = 8;
 
     Process p1(1, 0, std::vector<BurstStep>
@@ -89,7 +91,7 @@ void testSJNScheduler(){
 
     SJNScheduler scheduler;
     Logger logger("simulation.txt");
-    
+
     Simulation simulation(processes, &scheduler, &logger);
     simulation.run();
 
@@ -119,6 +121,80 @@ void testSJNScheduler(){
               << (p3.getState() == ProcessState::Terminated ? "Terminated" : "Not Terminated")
               << "\n";
 
+}
+
+void testSTCFScheduler()
+{
+    const int numPages = 8;
+
+    // P1 arrives first with a long burst — should be preempted by P2 and P3
+    Process p1(1, 0, std::vector<BurstStep>
+    {
+        {true, 5},   // CPU — long, should be preempted
+        {false, 2},  // I/O
+        {true, 1}    // CPU
+    }, numPages);
+
+    // P2 arrives at t=1 with shorter burst — should preempt P1
+    Process p2(2, 1, std::vector<BurstStep>
+    {
+        {true, 2}    // CPU
+    }, numPages);
+
+    // P3 arrives at t=2 with shortest burst — should preempt P2
+    Process p3(3, 2, std::vector<BurstStep>
+    {
+        {true, 1}    // CPU
+    }, numPages);
+
+    // P4: consecutive CPU bursts (no I/O between them) — tests the commented-out addProcess bug
+    Process p4(4, 0, std::vector<BurstStep>
+    {
+        {true, 2},   // CPU
+        {true, 2},   // CPU — consecutive, not I/O
+        {true, 1}    // CPU
+    }, numPages);
+
+    std::vector<Process*> processes = {&p1, &p2, &p3};
+
+    STCFScheduler scheduler;
+    Logger logger("stcf_simulation.txt");
+
+    Simulation simulation(processes, &scheduler, &logger);
+    simulation.run();
+
+    std::cout << "STCF Simulation complete\n\n";
+
+    // P3 should finish first (shortest job, arrives t=2, 1 burst)
+    std::cout << "P1\n";
+    std::cout << "  Waiting Time: " << p1.getWaitingTime() << '\n';
+    std::cout << "  Turnaround Time: " << p1.getTurnaroundTime() << '\n';
+    std::cout << "  Completion Time: " << p1.getCompletionTime() << '\n';
+    std::cout << "  Final State: "
+              << (p1.getState() == ProcessState::Terminated ? "Terminated" : "Not Terminated")
+              << "\n\n";
+
+    std::cout << "P2\n";
+    std::cout << "  Waiting Time: " << p2.getWaitingTime() << '\n';
+    std::cout << "  Turnaround Time: " << p2.getTurnaroundTime() << '\n';
+    std::cout << "  Completion Time: " << p2.getCompletionTime() << '\n';
+    std::cout << "  Final State: "
+              << (p2.getState() == ProcessState::Terminated ? "Terminated" : "Not Terminated")
+              << "\n\n";
+
+    std::cout << "P3\n";
+    std::cout << "  Waiting Time: " << p3.getWaitingTime() << '\n';
+    std::cout << "  Turnaround Time: " << p3.getTurnaroundTime() << '\n';
+    std::cout << "  Completion Time: " << p3.getCompletionTime() << '\n';
+    std::cout << "  Final State: "
+              << (p3.getState() == ProcessState::Terminated ? "Terminated" : "Not Terminated")
+              << "\n\n";
+
+    // Expected completion order: P3 -> P2 -> P1's I/O -> P1 final CPU
+    std::cout << "Expected completion order: P2, P3, P1\n";
+    std::cout << "Expected P2 completion time: 3\n";
+    std::cout << "Expected P3 completion time: 4\n";
+    std::cout << "Expected P1 completion time: 10\n";
 }
 
 void testMemoryTranslation()
@@ -176,6 +252,8 @@ int main()
     testSimulationBehavior();
     std::cout << '\n';
     testSJNScheduler();
+    std::cout << '\n';
+    testSTCFScheduler();
     std::cout << '\n';
     testMemoryTranslation();
     return 0;
