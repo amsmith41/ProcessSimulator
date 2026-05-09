@@ -4,7 +4,7 @@
 void FCFSScheduler::addProcess(Process* process)
 {
     if (process != nullptr) {
-    readyQueue.push(process);
+        readyQueue.push(process);
     }
 }
 
@@ -14,7 +14,6 @@ Process* FCFSScheduler::getNextProcess(int currentTime)
         return nullptr;
     }
     Process* nextProcess = readyQueue.front();
-    readyQueue.pop();
     return nextProcess;
 }
 
@@ -25,7 +24,10 @@ void FCFSScheduler::onTick(int currentTime, Process* runningProcess)
 
 void FCFSScheduler::onProcessBlocked(Process* process)
 {
-    // FCFS operates based on the ready queue, no need to handle blocked processes here
+    if(process == readyQueue.front()) { // We need to remove the process from the queue so that another process can run
+                                        //  (and eventually unblock this process)
+        readyQueue.pop();
+    }
 }
 
 void FCFSScheduler::onProcessUnblocked(Process* process)
@@ -35,7 +37,9 @@ void FCFSScheduler::onProcessUnblocked(Process* process)
 
 void FCFSScheduler::onProcessTerminated(Process* process)
 {
-    // FCFS operates based on the ready queue, no need to handle terminated processes here
+    if(process == readyQueue.front()) { // We need to remove the terminated process from the queue
+        readyQueue.pop();
+    }
 }
 
 bool FCFSScheduler::hasReadyProcesses() const

@@ -20,27 +20,25 @@ void Simulation::run()
     std::string contextSwitchReason; // Log context switch events, tracks the reason for the context switch
 
     while (!allProcessesCompleted) {
-        
-            // Get the newly arrived process and add it to the ready queue
-            for (Process* process : processes)
-            {
-                if (process->getState() == ProcessState::New && process->getArrivalTime() <= currentTime)
-                {
-                    process->setState(ProcessState::Ready); // New -> Ready state
-                    scheduler->addProcess(process);
+        // TICK
 
-                    if (logger != nullptr)
-                    {
-                        logger->logEvent(currentTime, process->getPid(), EventType::Arrival);
+        // Handle moving existing processes through the pipeline
+        for (Process* process : processes)
+        {
+            switch (process->getState()){
+                case ProcessState::New: // Insert new processes into the scheduler
+                    if(process->getArrivalTime() <= currentTime) {
+                        process->setState(ProcessState::Ready); // New -> Ready state
+                        scheduler->addProcess(process);
+
+                        if (logger != nullptr)
+                        {
+                            logger->logEvent(currentTime, process->getPid(), EventType::Arrival);
+                        }
                     }
-                }
-            }
+                break;
 
-            // Update the state of blocked processes and check if they can become unblocked
-            for (Process* process : processes)
-            {
-                if (process->getState() == ProcessState::Blocked)
-                {
+                case ProcessState::Blocked:  // Update the state of blocked processes and check if they can become unblocked
                     process->decrementCurrentBurst(); // Simulate one tick of the I/O burst for the blocked process
 
                     // Check if the blocked process can become unblocked
@@ -70,134 +68,130 @@ void Simulation::run()
                             }
                         }
                     }
-                }
-
+                break;
             }
+        }
 
-            // When the runningProcess == nullptr, the CPU is idle 
-            // So we need to get the next process to run from the scheduler
-            if (runningProcess == nullptr && scheduler->hasReadyProcesses())
+        // When the runningProcess == nullptr, the CPU is idle.
+        // Get the burst that we are going to execute for one tick from the scheduler.
+        runningProcess = scheduler->getNextProcess(currentTime);
+
+        if (runningProcess != nullptr)
+        {
+            if (logger != nullptr)
             {
-                runningProcess = scheduler->getNextProcess(currentTime);
-
-                if (runningProcess != nullptr)
+                if ( lastExitedProcessId == -1)
+                {          
+                    logger->logContextSwitch(currentTime, -1, runningProcess->getPid(), "CPU Idle -> Start Process");
+                }
+                else if (lastExitedProcessId != runningProcess->getPid())
                 {
-                    if (logger != nullptr)
-                    {
-                        if (lastExitedProcessId != -1)
-                        {
-                            logger->logContextSwitch(currentTime, lastExitedProcessId, runningProcess->getPid(), contextSwitchReason);
-                        }
-                        else
-                        {
-                            logger->logContextSwitch(currentTime, -1, runningProcess->getPid(), "CPU Idle -> Start Process");
-                        }
-                    }
-
-                    runningProcess->setState(ProcessState::Running);
-
-                    if (logger != nullptr)
-                    {
-                        // Unordered set required at this point to determine if a process 
-                        // Is starting for the first time, or has already been started in the past and is now resuming
-                        // Resuming is helpful for future scheduling algorithms like RRobin
-                        if (startedProcesses.find(runningProcess->getPid()) == startedProcesses.end())
-                        {
-                            logger->logEvent(currentTime, runningProcess->getPid(), EventType::Start);
-                            startedProcesses.insert(runningProcess->getPid());
-                        }
-                        else
-                        {
-                            logger->logEvent(currentTime, runningProcess->getPid(), EventType::Resume);
-                        }
-                        
-                    }
-
-                    // Reset context switch tracking variables
-                    lastExitedProcessId = -1;
-                    contextSwitchReason.clear();
+                                                                                                            // \/ This section is a bit rough, but we don't have another control flow for when processes have been swapped.
+                    logger->logContextSwitch(currentTime, lastExitedProcessId, runningProcess->getPid(), (contextSwitchReason.empty()) ? "Scheduler has swapped processes":contextSwitchReason);
                 }
             }
-            
-            // Simulate one tick of the running process that is currently running
-            if (runningProcess != nullptr)
+
+            runningProcess->setState(ProcessState::Running);
+            lastExitedProcessId = runningProcess->getPid();
+
+            if (logger != nullptr)
             {
-                runningProcess->decrementCurrentBurst();
-
-                // If and when the process finishes bursting
-                if (runningProcess->getRemainingBurstTime() == 0)
+                // Unordered set required at this point to determine if a process 
+                // Is starting for the first time, or has already been started in the past and is now resuming
+                // Resuming is helpful for future scheduling algorithms like RRobin
+                if (startedProcesses.find(runningProcess->getPid()) == startedProcesses.end())
                 {
-                    if (runningProcess->hasMoreBursts())
+                    logger->logEvent(currentTime, runningProcess->getPid(), EventType::Start);
+                    startedProcesses.insert(runningProcess->getPid());
+                }
+                else
+                {
+                    logger->logEvent(currentTime, runningProcess->getPid(), EventType::Resume);
+                }
+                
+            }
+
+            // Reset context switch tracking variables
+            contextSwitchReason.clear();
+        }
+        
+        // Simulate one tick of the running process that is currently running
+        if (runningProcess != nullptr)
+        {
+            runningProcess->decrementCurrentBurst();
+
+            // If and when the process finishes bursting
+            if (runningProcess->getRemainingBurstTime() == 0)
+            {
+                if (runningProcess->hasMoreBursts())
+                {
+                    runningProcess->advanceToNextBurst();
+
+                    if (runningProcess->isIO())
                     {
-                        runningProcess->advanceToNextBurst();
 
-                        if (runningProcess->isIO())
-                        {
-
-                            if (logger != nullptr)
-                            {
-                                logger->logEvent(currentTime + 1, runningProcess->getPid(), EventType::Block);
-                            }
-
-                            lastExitedProcessId = runningProcess->getPid();
-                            contextSwitchReason = "Process has been blocked";
-
-                            runningProcess->setState(ProcessState::Blocked);
-                            scheduler->onProcessBlocked(runningProcess);
-
-                        }
-                        else // Is CPU burst, so we can add it back to the ready queue
-                        {
-                            lastExitedProcessId = runningProcess->getPid();
-                            contextSwitchReason = "CPU burst completed";
-
-                            runningProcess->setState(ProcessState::Ready);
-                            scheduler->addProcess(runningProcess);
-                        }
-                    }
-                    else
-                    {
                         if (logger != nullptr)
                         {
-                            logger->logEvent(currentTime + 1, runningProcess->getPid(), EventType::Terminate);
+                            logger->logEvent(currentTime + 1, runningProcess->getPid(), EventType::Block);
                         }
 
-                        lastExitedProcessId = runningProcess->getPid();
-                        contextSwitchReason = "Process has terminated";
+                        contextSwitchReason = "Process has been blocked";
 
-                        runningProcess->setState(ProcessState::Terminated);
-                        runningProcess->setCompletionTime(currentTime + 1);
-                        runningProcess->calculateTurnaroundTime();
-                        scheduler->onProcessTerminated(runningProcess);
+                        runningProcess->setState(ProcessState::Blocked);
+                        scheduler->onProcessBlocked(runningProcess);
+
+                    }
+                    else // Is CPU burst, so we can add it back to the ready queue
+                    {
+                        // This code doesn't seem to get called, either that or contextSwitchReason is being overwritten somewhere.
+                        contextSwitchReason = "CPU burst completed";
+
+                        runningProcess->setState(ProcessState::Ready);
+                        //scheduler->addProcess(runningProcess);
+                    }
+                }
+                else
+                {
+                    if (logger != nullptr)
+                    {
+                        logger->logEvent(currentTime + 1, runningProcess->getPid(), EventType::Terminate);
                     }
 
-                    runningProcess = nullptr; // CPU becomes idle after process finishes its burst
+                    contextSwitchReason = "Process has terminated";
+
+                    runningProcess->setState(ProcessState::Terminated);
+                    runningProcess->setCompletionTime(currentTime + 1);
+                    runningProcess->calculateTurnaroundTime();
+                    scheduler->onProcessTerminated(runningProcess);
                 }
+
+                runningProcess = nullptr; // CPU becomes idle after process finishes its burst
             }
+        }
 
-            scheduler->onTick(currentTime, runningProcess); // Update internal state of scheduler
+        scheduler->onTick(currentTime, runningProcess); // Update internal state of scheduler
 
-            // Increment waiting time for every ready process
-            for (Process* process : processes)
+        // Increment waiting time for every ready process
+        for (Process* process : processes)
+        {
+            if (process->getState() == ProcessState::Ready)
             {
-                if (process->getState() == ProcessState::Ready)
-                {
-                    process->incrementWaitingTime();
-                }
+                process->incrementWaitingTime();
             }
+        }
 
-            // Check if all processes have completed, if so we can end the simulation
-            allProcessesCompleted = true; 
-            for (Process* process : processes)
+        // Check if all processes have completed, if so we can end the simulation
+        allProcessesCompleted = true; 
+        for (Process* process : processes)
+        {
+            if (process->getState() != ProcessState::Terminated)
             {
-                if (process->getState() != ProcessState::Terminated)
-                {
-                    allProcessesCompleted = false;
-                    break;
-                }
+                allProcessesCompleted = false;
+                break;
             }
+        }
 
-            ++currentTime; // Increment the current time after each tick
+        ++currentTime; // Increment the current time after each tick
 
     }
 }
