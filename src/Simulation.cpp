@@ -13,7 +13,7 @@ Simulation::Simulation(std::vector<Process*> processes, IScheduler* scheduler, L
 
 void Simulation::run()
 {
-    bool allProcessesCompleted = false; 
+    bool allProcessesCompleted = false;
     std::unordered_set<int> startedProcesses; // Set at the time a process starts running for the first time, used for logging
 
     int lastExitedProcessId = -1; // Log context switch events, tracks last process that exited the CPU

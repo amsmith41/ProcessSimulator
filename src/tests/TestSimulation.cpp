@@ -65,7 +65,6 @@ void testSimulationBehavior()
 }
 
 void testSJNScheduler(){
-    std::cout << "Does this even run?";
     const int numPages = 8;
 
     Process p1(1, 0, std::vector<BurstStep>
